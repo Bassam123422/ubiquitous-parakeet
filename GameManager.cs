@@ -2,56 +2,44 @@ using UnityEngine;
 using AppodealAds.Unity.Api;
 using AppodealAds.Unity.Common;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviour, IRewardedVideoAdListener
 {
-    public static GameManager Instance;
-    private int playerCoins = 0;
-
-    void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+    string appKey = "9a4c0fbb6096be429f2de5a1c20e1cba160429c9698afbd5";
 
     void Start()
     {
-        Debug.Log("Game Manager started.");
+        int adTypes = AppodealAdType.Interstitial | AppodealAdType.Banner | AppodealAdType.RewardedVideo;
+
+        Appodeal.initialize(appKey, adTypes, true);
+
+        Appodeal.setRewardedVideoCallbacks(this);
     }
 
-    public void AddCoins(int amount)
+    public void ShowInterstitial()
     {
-        playerCoins += amount;
-        Debug.Log("Coins: " + playerCoins);
-    }
-
-    public void ShowInterstitialAd()
-    {
-        if (Appodeal.isLoaded(Appodeal.INTERSTITIAL))
+        if (Appodeal.isLoaded(AppodealAdType.Interstitial))
         {
-            Appodeal.show(Appodeal.INTERSTITIAL);
-        }
-        else
-        {
-            Debug.Log("Interstitial Ad not loaded yet.");
+            Appodeal.show(AppodealShowStyle.Interstitial);
         }
     }
 
-    public void ShowRewardedAd()
+    public void ShowBanner()
     {
-        if (Appodeal.isLoaded(Appodeal.REWARDED_VIDEO))
+        Appodeal.show(AppodealShowStyle.BannerBottom);
+    }
+
+    public void ShowRewardedVideo()
+    {
+        if (Appodeal.isLoaded(AppodealAdType.RewardedVideo))
         {
-            Appodeal.show(Appodeal.REWARDED_VIDEO);
-        }
-        else
-        {
-            Debug.Log("Rewarded Ad not loaded yet.");
+            Appodeal.show(AppodealShowStyle.RewardedVideo);
         }
     }
+
+    public void onRewardedVideoLoaded(bool isPrecache) { }
+    public void onRewardedVideoFailedToLoad() { }
+    public void onRewardedVideoShown() { }
+    public void onRewardedVideoFinished(double amount, string name) { }
+    public void onRewardedVideoClosed(bool finished) { }
+    public void onRewardedVideoExpired() { }
 }
