@@ -1,43 +1,59 @@
 using UnityEngine;
-using AppodealAds.Unity.Api;
-using AppodealAds.Unity.Common;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 5f;
-    private Rigidbody2D rb;
+    public int health = 3;
+    public int score = 0;
+
+    private GameManager gameManager;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-
-        // Initialize Appodeal
-        string appKey = "9a4c0fbb6096be429f2de5a1c20e1cba160429c9698afbd5";
-        Appodeal.initialize(appKey, Appodeal.INTERSTITIAL | Appodeal.REWARDED_VIDEO);
-
-        Debug.Log("Appodeal Initialized with App Key: " + appKey);
+        gameManager = FindObjectOfType<GameManager>();
     }
 
     void Update()
     {
-        float move = Input.GetAxis("Horizontal");
-        rb.velocity = new Vector2(move * speed, rb.velocity.y);
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (health <= 0)
         {
-            ShowRewardedAd();
+            OnPlayerLose();
         }
     }
 
-    void ShowRewardedAd()
+    public void TakeDamage(int damage)
     {
-        if (Appodeal.isLoaded(Appodeal.REWARDED_VIDEO))
+        health -= damage;
+        if (health <= 0)
         {
-            Appodeal.show(Appodeal.REWARDED_VIDEO);
+            OnPlayerLose();
         }
-        else
+    }
+
+    void OnPlayerLose()
+    {
+        if (gameManager != null)
         {
-            Debug.Log("Rewarded video not loaded yet.");
+            gameManager.ShowAdOnGameOver();
         }
+        ResetGame();
+    }
+
+    public void AddScore(int points)
+    {
+        score += points;
+    }
+
+    public void RequestReward()
+    {
+        if (gameManager != null)
+        {
+            gameManager.ShowRewardedAd();
+        }
+    }
+
+    void ResetGame()
+    {
+        health = 3;
+        score = 0;
     }
 }
